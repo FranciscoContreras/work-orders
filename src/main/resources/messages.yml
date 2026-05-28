@@ -1,0 +1,100 @@
+# ============================================================================
+#  Work Orders — player-facing messages, in the Sunday Market design grammar.
+#  MiniMessage formatting; {braces} = our placeholders.
+#  House style: ✦ brand bullet · │ ┌ ┐ └ rails · › » pointers · copper-gradient wordmark · red accent.
+#  Edit freely to re-brand — but the ✦ / │ grammar is the signature.
+# ============================================================================
+
+prefix: "<red>✦</red> <gradient:#c8773c:#e0a25a>Work Orders</gradient> <dark_gray>»</dark_gray> "
+brand:
+  signature: "<dark_gray>Work Orders</dark_gray> <red>✦</red> <dark_gray>Machina</dark_gray>"
+
+assign:
+  success: "<red>✦</red> <gray>Now a <gold>{role}</gold>. <dark_gray>Tap a container to set its pickup.</dark_gray>"
+  success-janitor: "<red>✦</red> <gray>Now a <gold>Janitor</gold>. <dark_gray>Tap a chest to store what it tidies.</dark_gray>"
+  success-sorter: "<red>✦</red> <gray>Now a <gold>Sorter</gold>. <dark_gray>Tap the source, then each destination chest; tap me when done.</dark_gray>"
+  success-farmhand: "<red>✦</red> <gray>Now a <gold>Farmhand</gold>. <dark_gray>I'll tend the crops around me — pair me with a Janitor to gather the harvest.</dark_gray>"
+  no-permission: "<red>✦ You can't put a copper golem to work as a {role} yet.</red>"
+
+bind:
+  source-set: "<red>✦</red> <gray>Pickup set: <white>{target}</white>. <dark_gray>Now tap where to drop off.</dark_gray>"
+  dest-set: "<red>✦</red> <gray>Route set: <white>{source}</white> <dark_gray>›</dark_gray> <white>{dest}</white>. <gold>On the job.</gold>"
+  sort-added: "<red>✦</red> <gray>Destination <white>{count}</white> added: <white>{dest}</white>. <dark_gray>Tap more, or tap me to finish.</dark_gray>"
+  sort-done: "<red>✦</red> <gray>Sorting into <white>{count}</white> chest(s). <gold>On the job.</gold>"
+  cancelled: "<dark_gray>✦ Never mind, then.</dark_gray>"
+  too-far: "<red>✦ That's too far for me — max {max} blocks.</red>"
+  cross-world: "<red>✦ That's in another world — I can't reach it.</red>"
+  not-a-container: "<dark_gray>✦ Point me at a chest, barrel, furnace, and the like.</dark_gray>"
+
+follow:
+  on: "<red>✦</red> <gray>I'll <white>follow</white> you.</gray>"
+  off: "<red>✦</red> <gray>I'll <white>stay</white> here and work.</gray>"
+
+whistle:
+  found: "<red>✦</red> <gray><white>{count}</white> of your copper folk are nearby.</gray>"
+  none: "<dark_gray>✦ None of your copper folk are nearby.</dark_gray>"
+
+inspect:
+  unassigned: "<dark_gray>✦ Idle — hand me a Work Order to begin.</dark_gray>"
+  status: "<red>✦</red> <gray><gold>{role}</gold> <dark_gray>│</dark_gray> {state} <dark_gray>│</dark_gray> {oxidation}</gray>"
+
+ownership:
+  not-yours: "<red>✦ This isn't your copper golem.</red>"
+
+trust:
+  added: "<red>✦</red> <gray><white>{name}</white> can now put this golem to work too.</gray>"
+  removed: "<red>✦</red> <gray><white>{name}</white> can no longer task this golem.</gray>"
+  not-owner: "<red>✦ Only the owner can change who's trusted.</red>"
+  head-needed: "<dark_gray>✦ Hold a player's head to trust (or un-trust) that player.</dark_gray>"
+
+# Short status words shown when you inspect a golem (plain text, substituted into inspect.status).
+state:
+  hauling: "hauling"
+  tidying: "tidying up"
+  tending: "tending crops"
+  stuck: "stuck - can't reach"
+  dest-full: "drop-off full"
+  no-route: "needs a route"
+  idle: "idle"
+
+workorder:
+  courier:
+    name: "<gradient:#c8773c:#e0a25a>Courier Work Order</gradient>"
+    lore: "<gray>Hand to a copper golem: it becomes a <gold>Courier</gold> and hauls items between two containers.</gray>"
+  stoker:
+    name: "<gradient:#c8773c:#e0a25a>Stoker Work Order</gradient>"
+    lore: "<gray>Hand to a copper golem: it becomes a <gold>Stoker</gold> and keeps a furnace fed.</gray>"
+  restocker:
+    name: "<gradient:#c8773c:#e0a25a>Restocker Work Order</gradient>"
+    lore: "<gray>Hand to a copper golem: it becomes a <gold>Restocker</gold> and tops a container up.</gray>"
+  janitor:
+    name: "<gradient:#c8773c:#e0a25a>Janitor Work Order</gradient>"
+    lore: "<gray>Hand to a copper golem: it becomes a <gold>Janitor</gold> and sweeps up dropped items.</gray>"
+  sorter:
+    name: "<gradient:#c8773c:#e0a25a>Sorter Work Order</gradient>"
+    lore: "<gray>Hand to a copper golem: it becomes a <gold>Sorter</gold> and files items into chests by what each already holds.</gray>"
+  farmhand:
+    name: "<gradient:#c8773c:#e0a25a>Farmhand Work Order</gradient>"
+    lore: "<gray>Hand to a copper golem: it becomes a <gold>Farmhand</gold> and harvests and replants the crops around it.</gray>"
+
+filter:
+  title: "<dark_gray>┌</dark_gray> <gradient:#c8773c:#e0a25a>Work Orders</gradient> <red>✦</red> <white>Filter</white> <dark_gray>┐</dark_gray>"
+  done: "<gold>Close to save</gold>"
+  remove-hint: "<gray>Click to remove from filter</gray>"
+  toggle-whitelist: "<green>Whitelist</green> <dark_gray>— only these (click to flip)</dark_gray>"
+  toggle-blacklist: "<red>Blacklist</red> <dark_gray>— anything but these (click to flip)</dark_gray>"
+  saved: "<red>✦</red> <gray>Filter set: <white>{count}</white> item(s) <dark_gray>({mode})</dark_gray>.</gray>"
+
+admin:
+  reloaded: "<red>✦</red> <gradient:#c8773c:#e0a25a>Work Orders</gradient> <gray>reloaded.</gray>"
+  usage: "<red>✦</red> <gray>/workorders <white>reload</white> <dark_gray>│</dark_gray> <white>status</white> <dark_gray>│</dark_gray> <white>spike</white></gray>"
+  no-permission: "<red>✦ You don't have permission for that.</red>"
+  status-header: "<dark_gray>┌</dark_gray> <gradient:#c8773c:#e0a25a>Work Orders</gradient> <red>✦</red> <white>Status</white> <dark_gray>┐</dark_gray>"
+  status-tracked: "<gray>│</gray> <gray>tracked golems: <white>{count}</white></gray>"
+  status-timing: "<gray>│</gray> <gray>service: <white>{interval}t</white> <dark_gray>·</dark_gray> slices <white>{slices}</white></gray>"
+  status-radius: "<gray>│</gray> <gray>active radius: <white>{active}</white> <dark_gray>·</dark_gray> range cap <white>{range}</white></gray>"
+  status-suppress: "<dark_gray>└ native-sort: {mode}</dark_gray>"
+  spike-header: "<dark_gray>┌</dark_gray> <gradient:#c8773c:#e0a25a>Work Orders</gradient> <red>✦</red> <white>Native goals ({count})</white> <dark_gray>┐</dark_gray>"
+  spike-line: "<gray>│</gray> <white>{key}</white>"
+  spike-footer: "<dark_gray>└ a sorting-like key here would be removable</dark_gray>"
+  spike-none: "<red>✦ No copper golem within reach.</red>"

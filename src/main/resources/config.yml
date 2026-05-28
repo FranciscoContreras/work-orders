@@ -1,0 +1,123 @@
+# ============================================================================
+#  Work Orders — give your copper golems jobs.
+#  Interaction-driven: hand a golem an item to assign a job, then tap containers
+#  to bind its route. No commands needed (one admin command for reload/spike).
+# ============================================================================
+
+settings:
+  # How often the work scheduler fires, in ticks (10 = twice per second).
+  service-interval-ticks: 10
+  # Golems are processed in this many rotating groups (1/N per fire) to spread load.
+  slices: 4
+  # A golem only works when a player is within this many blocks of it or its targets;
+  # otherwise it hibernates (no offline item flow, and no wasted CPU).
+  active-radius: 64.0
+  # Maximum distance (blocks) between a golem and a container it can be bound to. Hard-capped at 64.
+  range-cap: 48.0
+  # Pathfinding speed multiplier when walking to a target.
+  move-speed: 1.0
+  # Items carried per trip (vanilla copper-golem cadence is 16). Higher = faster, less "alive".
+  pull-batch: 16
+  # Work cycles with no reachable path before a route is marked "stuck".
+  path-fail-grace: 3
+  # How long (ticks) the two-tap "set source then destination" flow stays open. 600 = 30s.
+  bind-session-ttl-ticks: 600
+
+ownership:
+  # Only the golem's summoner (or workorders.admin) may re-task it.
+  trusted-only-retask: true
+  # Anyone may wax a golem with honeycomb (mirrors vanilla waxing). If false, owner/admin only.
+  wax-anyone: true
+  # Sneak + right-click air holding the whistle item to briefly glow your nearby golems.
+  whistle-enabled: true
+  whistle-item: COPPER_INGOT
+  whistle-radius: 48.0
+  whistle-glow-seconds: 4
+  # If true, assigning a role consumes one of the held item; if false (default), it's only copied
+  # onto the golem as a visible label (no "where did my item go" confusion).
+  consume-role-item: false
+
+native-ai:
+  # auto = if the runtime spike finds a removable native sorting goal, suppress it on managed golems;
+  #        otherwise coexist. off = always coexist (never touch native goals).
+  suppress-native-sort: auto
+
+gating:
+  # Require a per-job permission (workorders.job.<role>) to assign that job. Map these to ranks in
+  # your permissions plugin. Set false to let anyone use every job.
+  require-permission: true
+
+# Jobs are assigned by crafting a Work Order item (see the recipe book) and handing it to a golem —
+# that's the intended, vanilla way. Costs are configured under `work-orders` below.
+#
+# OPTIONAL: this map also lets a PLAIN vanilla item assign a job (handy for quick testing, or a
+# no-crafting setup). Empty by default so normal items keep their normal use near golems.
+roles: {}
+#  courier: [HOPPER_MINECART]
+#  stoker: [FURNACE, BLAST_FURNACE]
+
+work-orders:
+  # Each job's Work Order is a SHAPED recipe (this is the cost — edit shape + ingredients freely).
+  #   'shape'       : up to 3 rows; a space ' ' is an empty cell.
+  #   'ingredients' : maps each shape symbol to an item.
+  #   'model'       : optional custom_model_data (0 = none; set to a resource-pack id for a custom texture).
+  # The default pattern (5 copper + paper + the job's tool):
+  #     " C "        C = COPPER_INGOT
+  #     "CPC"        P = PAPER  (the work order itself)
+  #     "CTC"        T = the job's tool
+  courier:
+    shape: [" C ", "CPC", "CTC"]
+    ingredients: { C: COPPER_INGOT, P: PAPER, T: HOPPER }
+    model: 0
+  stoker:
+    shape: [" C ", "CPC", "CTC"]
+    ingredients: { C: COPPER_INGOT, P: PAPER, T: FURNACE }
+    model: 0
+  restocker:
+    shape: [" C ", "CPC", "CTC"]
+    ingredients: { C: COPPER_INGOT, P: PAPER, T: BARREL }
+    model: 0
+  janitor:
+    shape: [" C ", "CPC", "CTC"]
+    ingredients: { C: COPPER_INGOT, P: PAPER, T: BRUSH }
+    model: 0
+  sorter:
+    shape: [" C ", "CPC", "CTC"]
+    ingredients: { C: COPPER_INGOT, P: PAPER, T: COMPARATOR }
+    model: 0
+  farmhand:
+    shape: [" C ", "CPC", "CTC"]
+    ingredients: { C: COPPER_INGOT, P: PAPER, T: IRON_HOE }
+    model: 0
+
+restocker:
+  # Default "keep topped up to N" when a Restocker has no explicit threshold set.
+  default-threshold: 64
+
+janitor:
+  # How far (blocks) a Janitor vacuums dropped items around itself. The only entity-scanning
+  # role; runs only on the golem's own service tick and only when a player is near. Capped at 16.
+  radius: 6
+
+farmhand:
+  # How far (blocks) a Farmhand tends crops around itself. It scans blocks, so this is kept small.
+  # Capped at 8. Stand the golem in the field; produce drops for a Janitor or hopper to gather.
+  radius: 4
+
+oxidation:
+  # If true, golems work more slowly as they oxidise (before they freeze). Off = full speed until frozen.
+  efficiency-scales-with-oxidation: false
+
+feedback:
+  # off | subtle | normal | lively — scales particles/sounds. The plugin is silent on 'off'.
+  intensity: normal
+  sounds: true
+  actionbar: true
+  # Glow a fully-oxidised (frozen) golem so you can find it.
+  frozen-glow: true
+  # Particles/sounds as a golem oxidises and slows.
+  sluggish-fx: true
+  # Delight touch: a golem occasionally brings its owner a flower after finishing a big batch.
+  bring-flower: true
+
+debug: false

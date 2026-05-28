@@ -1,0 +1,35 @@
+name: WorkOrders
+version: 1.0.0
+main: com.wearemachina.workorders.WorkOrdersPlugin
+api-version: '1.21'
+author: Machina
+description: Put your copper golems to work - couriers, stokers, restockers and a little tidiness.
+softdepend: [PlaceholderAPI, Vault]
+commands:
+  workorders:
+    description: Admin - reload config, show status, probe native AI goals.
+    usage: /workorders <reload|status|spike>
+    aliases: [wo]
+    permission: workorders.admin
+permissions:
+  workorders.admin:
+    description: Manage Work Orders; bypass ownership and job gating.
+    default: op
+  workorders.job.courier:
+    description: Allowed to assign the Courier job.
+    default: true
+  workorders.job.stoker:
+    description: Allowed to assign the Stoker job.
+    default: true
+  workorders.job.restocker:
+    description: Allowed to assign the Restocker job.
+    default: true
+  workorders.job.janitor:
+    description: Allowed to assign the Janitor job.
+    default: true
+  workorders.job.sorter:
+    description: Allowed to assign the Sorter job.
+    default: true
+  workorders.job.farmhand:
+    description: Allowed to assign the Farmhand job.
+    default: true

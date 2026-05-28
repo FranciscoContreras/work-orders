@@ -1,0 +1,21 @@
+# ── Work Orders ──
+
+# Build output & Gradle caches
+build/
+.gradle/
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+out/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
