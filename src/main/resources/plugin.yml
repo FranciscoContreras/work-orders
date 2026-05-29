@@ -1,5 +1,5 @@
 name: WorkOrders
-version: 1.0.1
+version: 1.0.2
 main: com.wearemachina.workorders.WorkOrdersPlugin
 api-version: '1.21'
 author: Machina

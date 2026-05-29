@@ -45,8 +45,11 @@ ownership:
   consume-role-item: false
 
 native-ai:
-  # auto = if the runtime spike finds a removable native sorting goal, suppress it on managed golems;
-  #        otherwise coexist. off = always coexist (never touch native goals).
+  # The vanilla copper-golem sorting brain grabs loose items (including the produce a Farmhand drops)
+  # and ferries them off to copper chests, dragging managed golems off-task. That brain goal can't be
+  # removed through the API, so instead:
+  #   auto (default) = disable native item pickup on managed golems, starving that behaviour.
+  #   off            = leave vanilla pickup/sorting fully alone (coexist).
   suppress-native-sort: auto
 
 gating:

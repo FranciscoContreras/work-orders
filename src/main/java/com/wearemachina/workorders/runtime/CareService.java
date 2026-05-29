@@ -61,6 +61,13 @@ public final class CareService {
                 frozenGlowing.remove(id);
                 continue;
             }
+            // Neutralize the native copper-golem sorting brain: with item pickup off it can't ferry our
+            // dropped produce (or any ground items) off to copper chests, which otherwise drags a Farmhand
+            // out of the field mid-harvest. The brain goal itself isn't a legacy Goal we can remove, so we
+            // remove its fuel instead. Honors native-ai.suppress-native-sort (off = leave vanilla pickup alone).
+            if (!"off".equalsIgnoreCase(c.suppressNativeSort) && golem.getCanPickupItems()) {
+                golem.setCanPickupItems(false);
+            }
             WeatheringCopperState weather = golem.getWeatheringState();
             boolean frozen = weather == WeatheringCopperState.OXIDIZED;
 
