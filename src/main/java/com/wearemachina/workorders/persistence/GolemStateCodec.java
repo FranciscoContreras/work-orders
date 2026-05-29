@@ -62,6 +62,7 @@ public final class GolemStateCodec {
             for (UUID id : s.trusted()) {
                 writeUuid(out, id);
             }
+            writeNullableString(out, s.baseName()); // trailing field — old readers ignore it, old blobs EOF to null
         } catch (IOException e) {
             throw new UncheckedIOException(e); // ByteArrayOutputStream never actually throws
         }
@@ -110,6 +111,7 @@ public final class GolemStateCodec {
                     s.trusted().add(id);
                 }
             }
+            s.baseName(readNullableString(in)); // absent in pre-nameplate blobs -> EOF -> caught below -> null (fine)
         } catch (IOException e) {
             // Truncated/corrupt: keep whatever parsed; never throw out of a PDC read.
             return s;
@@ -163,6 +165,15 @@ public final class GolemStateCodec {
         }
         out.writeBoolean(true);
         out.writeUTF(m.name());
+    }
+
+    private static void writeNullableString(DataOutputStream out, String v) throws IOException {
+        if (v == null) {
+            out.writeBoolean(false);
+            return;
+        }
+        out.writeBoolean(true);
+        out.writeUTF(v);
     }
 
     private static String readNullableString(DataInputStream in) throws IOException {

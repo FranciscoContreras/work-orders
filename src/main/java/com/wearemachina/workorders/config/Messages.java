@@ -44,6 +44,18 @@ public final class Messages {
         return mm.deserialize(raw);
     }
 
+    /** Render a key with {@code {placeholder}} substitutions, falling back to {@code def} if the key is absent. */
+    public Component renderOr(String key, String def, String... kv) {
+        String raw = cfg.getString(key, def);
+        if (raw == null) {
+            raw = def;
+        }
+        for (int i = 0; i + 1 < kv.length; i += 2) {
+            raw = raw.replace("{" + kv[i] + "}", kv[i + 1]);
+        }
+        return mm.deserialize(raw);
+    }
+
     /** Render with the configured prefix prepended (for chat lines, not action bars). */
     public Component prefixed(String key, String... kv) {
         return prefix.append(render(key, kv));

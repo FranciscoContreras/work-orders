@@ -31,7 +31,8 @@ follow:
   off: "<red>✦</red> <gray>I'll <white>stay</white> here and work.</gray>"
 
 whistle:
-  found: "<red>✦</red> <gray><white>{count}</white> of your copper folk are nearby.</gray>"
+  recalled: "<red>✦</red> <gray>Called <white>{count}</white> of your copper folk to heel.</gray>"
+  dismissed: "<red>✦</red> <gray>Sent <white>{count}</white> copper folk back to work.</gray>"
   none: "<dark_gray>✦ None of your copper folk are nearby.</dark_gray>"
 
 inspect:
@@ -46,6 +47,16 @@ trust:
   removed: "<red>✦</red> <gray><white>{name}</white> can no longer task this golem.</gray>"
   not-owner: "<red>✦ Only the owner can change who's trusted.</red>"
   head-needed: "<dark_gray>✦ Hold a player's head to trust (or un-trust) that player.</dark_gray>"
+
+# The floating job nameplate above a golem (feedback.nameplate). {name} = the golem's name-tag name.
+nameplate:
+  separator: " <dark_gray>·</dark_gray> "
+  courier: "<gradient:#c8773c:#e0a25a>✦ Courier</gradient>"
+  stoker: "<gradient:#c8773c:#e0a25a>✦ Stoker</gradient>"
+  restocker: "<gradient:#c8773c:#e0a25a>✦ Restocker</gradient>"
+  janitor: "<gradient:#c8773c:#e0a25a>✦ Janitor</gradient>"
+  sorter: "<gradient:#c8773c:#e0a25a>✦ Sorter</gradient>"
+  farmhand: "<gradient:#c8773c:#e0a25a>✦ Farmhand</gradient>"
 
 # Short status words shown when you inspect a golem (plain text, substituted into inspect.status).
 state:

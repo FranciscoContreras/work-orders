@@ -35,6 +35,8 @@ public final class PluginConfig {
     public final Material whistleItem;
     public final double whistleRadius;
     public final int whistleGlowSeconds;
+    public final double followMaxDistance;
+    public final double followStopDistance;
     public final boolean consumeRoleItem;
 
     // native AI
@@ -59,6 +61,8 @@ public final class PluginConfig {
     public final FeedbackIntensity intensity;
     public final boolean sounds;
     public final boolean actionbar;
+    public final int actionbarHoldTicks;
+    public final boolean nameplate;
     public final boolean frozenGlow;
     public final boolean sluggishFx;
     public final boolean bringFlower;
@@ -87,6 +91,9 @@ public final class PluginConfig {
         this.whistleItem = matchOr(c.getString("ownership.whistle-item", "COPPER_INGOT"), Material.COPPER_INGOT);
         this.whistleRadius = c.getDouble("ownership.whistle-radius", 48.0);
         this.whistleGlowSeconds = Math.max(1, c.getInt("ownership.whistle-glow-seconds", 4));
+        this.followStopDistance = Math.max(1.5, c.getDouble("ownership.follow-stop-distance", 3.0));
+        this.followMaxDistance = Math.max(this.followStopDistance + 4.0,
+                c.getDouble("ownership.follow-max-distance", 18.0));
         this.consumeRoleItem = c.getBoolean("ownership.consume-role-item", false);
 
         this.suppressNativeSort = c.getString("native-ai.suppress-native-sort", "auto");
@@ -95,14 +102,16 @@ public final class PluginConfig {
 
         this.restockerDefaultThreshold = Math.max(1, c.getInt("restocker.default-threshold", 64));
 
-        this.janitorRadius = Math.min(16, Math.max(1, c.getInt("janitor.radius", 6)));
-        this.farmhandRadius = Math.min(8, Math.max(1, c.getInt("farmhand.radius", 4)));
+        this.janitorRadius = Math.min(48, Math.max(1, c.getInt("janitor.radius", 8)));
+        this.farmhandRadius = Math.min(48, Math.max(1, c.getInt("farmhand.radius", 8)));
 
         this.efficiencyScalesWithOxidation = c.getBoolean("oxidation.efficiency-scales-with-oxidation", false);
 
         this.intensity = FeedbackIntensity.from(c.getString("feedback.intensity", "normal"));
         this.sounds = c.getBoolean("feedback.sounds", true);
         this.actionbar = c.getBoolean("feedback.actionbar", true);
+        this.actionbarHoldTicks = Math.max(0, Math.min(15, c.getInt("feedback.actionbar-hold-seconds", 4))) * 20;
+        this.nameplate = c.getBoolean("feedback.nameplate", true);
         this.frozenGlow = c.getBoolean("feedback.frozen-glow", true);
         this.sluggishFx = c.getBoolean("feedback.sluggish-fx", true);
         this.bringFlower = c.getBoolean("feedback.bring-flower", true);

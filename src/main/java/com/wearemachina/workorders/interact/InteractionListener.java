@@ -11,9 +11,12 @@ import com.wearemachina.workorders.persistence.GolemStore;
 import com.wearemachina.workorders.runtime.GolemRegistry;
 import com.wearemachina.workorders.runtime.StatusBoard;
 import com.wearemachina.workorders.ui.FilterMenu;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -30,6 +33,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -82,8 +86,12 @@ public final class InteractionListener implements Listener {
         ItemStack hand = player.getInventory().getItemInMainHand();
         Material type = hand.getType();
 
-        // Never touch vanilla interactions.
+        // Never touch vanilla interactions — but if a name tag renames a managed golem, fold the new name
+        // into its job nameplate ("<name> · <job>") a tick later, once vanilla has applied the rename.
         if (isVanillaInteraction(type)) {
+            if (type == Material.NAME_TAG) {
+                captureNameTag(golem, hand);
+            }
             return;
         }
 
@@ -152,14 +160,23 @@ public final class InteractionListener implements Listener {
         if (state.owner() == null) {
             state.owner(player.getUniqueId());
         }
+        boolean firstAssign = !state.assigned();
         state.role(role);
         state.carrying(false);
         state.source(null);
         state.dest(null);
         state.clearSortDests();
         state.labelItem(JobItems.labelMaterial(role));
+        // On the first assignment, adopt any name the player had already given it as the nameplate base.
+        if (firstAssign && state.baseName() == null) {
+            String existing = stripName(golem.getCustomName());
+            if (existing != null && !existing.isBlank()) {
+                state.baseName(existing);
+            }
+        }
         store.write(golem, state);
         registry.add(golem.getUniqueId());
+        fx.applyNameplate(golem, role, state.baseName());
 
         // Cosmetic role tool in the hand (drop chance 0 — a copy, never dropped, never duped).
         EntityEquipment eq = golem.getEquipment();
@@ -241,6 +258,38 @@ public final class InteractionListener implements Listener {
                 "role", pretty(state.role()),
                 "state", stateText,
                 "oxidation", pretty(golem.getWeatheringState().name()));
+    }
+
+    /**
+     * A renamed name tag was used on a managed golem. Vanilla applies the raw name this tick; one tick
+     * later we fold it back into the job nameplate as "{@code <name> · <job>}". A blank name tag (no
+     * custom name) does nothing in vanilla, so we ignore it and leave the existing nameplate alone.
+     */
+    private void captureNameTag(CopperGolem golem, ItemStack nameTag) {
+        if (!cfg.get().nameplate || !store.isManaged(golem)) {
+            return;
+        }
+        ItemMeta meta = nameTag.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) {
+            return;
+        }
+        String newBase = stripName(meta.getDisplayName());
+        if (newBase == null || newBase.isBlank()) {
+            return;
+        }
+        UUID id = golem.getUniqueId();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!(Bukkit.getEntity(id) instanceof CopperGolem g) || !store.isManaged(g)) {
+                return;
+            }
+            GolemState st = store.read(g);
+            if (st.role() == null) {
+                return;
+            }
+            st.baseName(newBase);
+            store.write(g, st);
+            fx.applyNameplate(g, st.role(), newBase);
+        }, 1L);
     }
 
     // ----- tap a container (binding) / whistle --------------------------------------------------
@@ -332,7 +381,7 @@ public final class InteractionListener implements Listener {
     private void whistle(Player player, PluginConfig c) {
         UUID me = player.getUniqueId();
         int radius = (int) Math.ceil(c.whistleRadius);
-        int found = 0;
+        List<CopperGolem> mine = new ArrayList<>();
         for (Entity e : player.getNearbyEntities(radius, radius, radius)) {
             if (!(e instanceof CopperGolem golem) || !store.isManaged(golem)) {
                 continue;
@@ -341,17 +390,31 @@ public final class InteractionListener implements Listener {
             if (st.owner() != null && !st.owner().equals(me)) {
                 continue;
             }
-            found++;
-            golem.setGlowing(true);
-            fx.whistlePing(golem);
-            UUID id = golem.getUniqueId();
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (Bukkit.getEntity(id) instanceof CopperGolem g) {
-                    g.setGlowing(false);
-                }
-            }, c.whistleGlowSeconds * 20L);
+            mine.add(golem);
         }
-        fx.actionBar(player, found > 0 ? "whistle.found" : "whistle.none", "count", String.valueOf(found));
+        if (mine.isEmpty()) {
+            fx.actionBar(player, "whistle.none", "count", "0");
+            return;
+        }
+        // Toggle the group: if any are already heeling, dismiss them all; otherwise call them all in.
+        boolean recall = mine.stream().noneMatch(g -> store.read(g).follow());
+        for (CopperGolem golem : mine) {
+            GolemState st = store.read(golem);
+            st.follow(recall);
+            store.write(golem, st);
+            if (recall) {
+                golem.setGlowing(true);
+                fx.whistlePing(golem);
+                UUID id = golem.getUniqueId();
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (Bukkit.getEntity(id) instanceof CopperGolem g) {
+                        g.setGlowing(false);
+                    }
+                }, c.whistleGlowSeconds * 20L);
+            }
+        }
+        fx.actionBar(player, recall ? "whistle.recalled" : "whistle.dismissed",
+                "count", String.valueOf(mine.size()));
     }
 
     // ----- helpers ------------------------------------------------------------------------------
@@ -377,6 +440,11 @@ public final class InteractionListener implements Listener {
             return fallback;
         }
         return pretty(loc.getBlock().getType().name());
+    }
+
+    /** Strip legacy colour codes from a name so it renders cleanly as plain text in the nameplate. */
+    private static String stripName(String legacy) {
+        return legacy == null ? null : ChatColor.stripColor(legacy);
     }
 
     private static String pretty(RoleType role) {

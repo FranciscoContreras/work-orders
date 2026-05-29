@@ -5,11 +5,13 @@ import com.wearemachina.workorders.config.PluginConfig;
 import com.wearemachina.workorders.gate.JobGate;
 import com.wearemachina.workorders.haul.ContainerAccess;
 import com.wearemachina.workorders.haul.DepositPolicy;
+import com.wearemachina.workorders.interact.ActionBarService;
 import com.wearemachina.workorders.interact.BindSessionManager;
 import com.wearemachina.workorders.interact.Feedback;
 import com.wearemachina.workorders.interact.InteractionListener;
 import com.wearemachina.workorders.item.JobItems;
 import com.wearemachina.workorders.lifecycle.GolemLifecycleListener;
+import com.wearemachina.workorders.model.GolemState;
 import com.wearemachina.workorders.persistence.GolemStore;
 import com.wearemachina.workorders.persistence.Keys;
 import com.wearemachina.workorders.role.RoleRegistry;
@@ -37,6 +39,7 @@ public final class WorkOrdersPlugin extends JavaPlugin {
     private Keys keys;
     private GolemStore store;
     private GolemRegistry registry;
+    private ActionBarService actionBar;
     private Feedback feedback;
     private GolemTickService tickService;
     private CareService careService;
@@ -49,7 +52,8 @@ public final class WorkOrdersPlugin extends JavaPlugin {
         this.keys = new Keys(this);
         this.store = new GolemStore(keys);
         this.registry = new GolemRegistry();
-        this.feedback = new Feedback(configHolder);
+        this.actionBar = new ActionBarService(this);
+        this.feedback = new Feedback(configHolder, actionBar);
 
         BindSessionManager sessions = new BindSessionManager();
         JobGate gate = new JobGate(configHolder);
@@ -95,6 +99,9 @@ public final class WorkOrdersPlugin extends JavaPlugin {
         if (careService != null) {
             careService.stop();
         }
+        if (actionBar != null) {
+            actionBar.shutdown();
+        }
         getLogger().info("Work Orders disabled.");
     }
 
@@ -114,6 +121,10 @@ public final class WorkOrdersPlugin extends JavaPlugin {
             for (Entity entity : world.getEntities()) {
                 if (entity instanceof CopperGolem golem && store.isManaged(golem)) {
                     registry.add(golem.getUniqueId());
+                    GolemState state = store.read(golem);
+                    if (state.role() != null) {
+                        feedback.applyNameplate(golem, state.role(), state.baseName());
+                    }
                     found++;
                 }
             }

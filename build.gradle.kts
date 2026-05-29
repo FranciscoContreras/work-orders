@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.wearemachina"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -11,14 +11,13 @@ repositories {
 }
 
 dependencies {
-    // Paper API — exposes CopperGolem first-class (verified via javap). This 1.21.x API
-    // artifact is binary-compatible with the 26.1.x server runtime (stable Bukkit API).
+    // The Paper/Purpur 1.21.11 API exposes CopperGolem first-class (verified via javap).
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
 }
 
-// Compiles for Java 21 (`release 21`) using whatever JDK 21+ runs Gradle.
-// To pin the JDK for contributors instead, add:
-//   java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+// Compile targeting Java 21 with whatever JDK runs Gradle (here: dev/jdk-linux, JDK 21).
+// No toolchain block on purpose — avoids auto-provisioning in this offline-ish environment.
+// For publishing, a `java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }` block is fine.
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.release.set(21)

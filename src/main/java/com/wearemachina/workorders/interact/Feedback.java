@@ -3,11 +3,16 @@ package com.wearemachina.workorders.interact;
 import com.wearemachina.workorders.config.ConfigHolder;
 import com.wearemachina.workorders.config.FeedbackIntensity;
 import com.wearemachina.workorders.config.PluginConfig;
+import com.wearemachina.workorders.model.RoleType;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.entity.CopperGolem;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -21,9 +26,11 @@ import org.bukkit.util.Vector;
 public final class Feedback {
 
     private final ConfigHolder cfg;
+    private final ActionBarService actionBar;
 
-    public Feedback(ConfigHolder cfg) {
+    public Feedback(ConfigHolder cfg, ActionBarService actionBar) {
         this.cfg = cfg;
+        this.actionBar = actionBar;
     }
 
     private PluginConfig c() {
@@ -36,7 +43,37 @@ public final class Feedback {
         if (player == null || !c().actionbar) {
             return;
         }
-        player.sendActionBar(c().messages.render(key, placeholders));
+        // Hold the line on screen for a few seconds so a mob-health (or other) action-bar writer can't
+        // immediately overwrite it; the newest line wins and resets the timer.
+        actionBar.hold(player, c().messages.render(key, placeholders), c().actionbarHoldTicks);
+    }
+
+    // ----- job nameplate ------------------------------------------------------------------------
+
+    /** The floating-name component for a job: just the job, or {@code "<name> · <job>"} if the golem is named. */
+    public Component nameplate(RoleType role, String baseName) {
+        String def = "<gradient:#c8773c:#e0a25a>✦ " + titleCase(role.name()) + "</gradient>";
+        Component job = c().messages.renderOr("nameplate." + role.key(), def);
+        if (baseName == null || baseName.isBlank()) {
+            return job;
+        }
+        return Component.text(baseName, NamedTextColor.WHITE)
+                .append(c().messages.renderOr("nameplate.separator", " <dark_gray>·</dark_gray> "))
+                .append(job);
+    }
+
+    /** Show (or refresh) the golem's job nameplate, kept visible like a name tag. No-op if disabled. */
+    public void applyNameplate(CopperGolem golem, RoleType role, String baseName) {
+        if (golem == null || role == null || !c().nameplate) {
+            return;
+        }
+        golem.customName(nameplate(role, baseName));
+        golem.setCustomNameVisible(true);
+    }
+
+    private static String titleCase(String enumName) {
+        String s = enumName.toLowerCase(Locale.ROOT);
+        return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
     // ----- raw primitives -----------------------------------------------------------------------

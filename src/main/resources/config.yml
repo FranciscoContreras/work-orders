@@ -28,11 +28,18 @@ ownership:
   trusted-only-retask: true
   # Anyone may wax a golem with honeycomb (mirrors vanilla waxing). If false, owner/admin only.
   wax-anyone: true
-  # Sneak + right-click air holding the whistle item to briefly glow your nearby golems.
+  # Sneak + right-click air holding the whistle item to call your nearby golems to heel: they light up
+  # and walk to you (teleporting to catch up if they fall behind). Whistle again to send them back to work.
   whistle-enabled: true
   whistle-item: COPPER_INGOT
   whistle-radius: 48.0
   whistle-glow-seconds: 4
+  # Follow/heel movement. A following golem walks to its owner; if it falls past follow-max-distance
+  # (or can't find a path, or is in another world) it teleports just inside that range, behind the
+  # owner's view, and walks the rest of the way in — so the jump isn't seen. It stops within
+  # follow-stop-distance. (Max is clamped to at least stop + 4.)
+  follow-max-distance: 18.0
+  follow-stop-distance: 3.0
   # If true, assigning a role consumes one of the held item; if false (default), it's only copied
   # onto the golem as a visible label (no "where did my item go" confusion).
   consume-role-item: false
@@ -95,14 +102,16 @@ restocker:
   default-threshold: 64
 
 janitor:
-  # How far (blocks) a Janitor vacuums dropped items around itself. The only entity-scanning
-  # role; runs only on the golem's own service tick and only when a player is near. Capped at 16.
-  radius: 6
+  # How far (blocks) a Janitor vacuums dropped items around itself. The only entity-scanning role;
+  # runs only on the golem's own service tick and only when a player is near. Raise it to match a
+  # Farmhand's reach so one Janitor can gather a whole field. Capped at 48.
+  radius: 8
 
 farmhand:
-  # How far (blocks) a Farmhand tends crops around itself. It scans blocks, so this is kept small.
-  # Capped at 8. Stand the golem in the field; produce drops for a Janitor or hopper to gather.
-  radius: 4
+  # How far (blocks) a Farmhand tends crops around itself. One golem covers a (2·radius+1)² patch, so
+  # a larger radius means a big farm needs far fewer golems (radius 24 ≈ a 49×49 field). The block
+  # scan is sliced and only runs when a player is near, so large values stay cheap. Capped at 48.
+  radius: 8
 
 oxidation:
   # If true, golems work more slowly as they oxidise (before they freeze). Off = full speed until frozen.
@@ -113,6 +122,13 @@ feedback:
   intensity: normal
   sounds: true
   actionbar: true
+  # How long (seconds) an action-bar line is kept on screen, re-sent each tick so another plugin
+  # writing the action bar (e.g. a mob-health display) can't immediately overwrite it. 0 = one-shot
+  # (no hold). Capped at 15.
+  actionbar-hold-seconds: 4
+  # Float the golem's job above it like a name tag (e.g. "✦ Courier"). If you've named the golem with
+  # a name tag, it shows "<your name> · <job>". Set false to leave golems nameless.
+  nameplate: true
   # Glow a fully-oxidised (frozen) golem so you can find it.
   frozen-glow: true
   # Particles/sounds as a golem oxidises and slows.

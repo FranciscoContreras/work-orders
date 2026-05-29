@@ -18,6 +18,7 @@ public final class GolemState {
     private boolean carrying;          // true => the main-hand item is REAL cargo, not the cosmetic role label
     private java.util.UUID owner;      // the player who first tasked this golem (ownership for re-tasking)
     private org.bukkit.Material labelItem; // item shown in the golem's hand when idle (the role label)
+    private String baseName;           // the player's name-tag name, kept so the job nameplate can read "<name> · <job>"
     private final java.util.List<BindTarget> sortDests = new java.util.ArrayList<>(); // Sorter: destination chests
     private final java.util.List<java.util.UUID> trusted = new java.util.ArrayList<>(); // friends allowed to re-task
 
@@ -124,6 +125,15 @@ public final class GolemState {
 
     public void labelItem(org.bukkit.Material m) {
         this.labelItem = m;
+    }
+
+    /** The player-given name-tag name (without the job suffix), or {@code null} if the golem is unnamed. */
+    public String baseName() {
+        return baseName;
+    }
+
+    public void baseName(String name) {
+        this.baseName = name;
     }
 
     public boolean assigned() {
